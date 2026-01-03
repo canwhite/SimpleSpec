@@ -381,3 +381,6 @@ bash /path/to/install.sh backups
 - 2026-01-03: 创建 SimpleSpec 项目
 - 2026-01-03: 完成安装脚本和文档
 - 2026-01-03: 创建 production.md
+- 2026-01-03: 修改 install.sh 的 REPO_URL 为 canwhite/SimpleSpec
+- 2026-01-03: 优化 README.md 的 Context Engineering 部分，增强结构和实用性
+- 2026-01-03: 归档已完成任务 task_apply_config 和 task_check_requirements
