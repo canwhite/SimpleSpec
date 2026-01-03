@@ -1,309 +1,173 @@
 # SimpleSpec - Claude Code 配置文件自动化安装包
 
-> 🚀 一键安装 Claude Code 配置文件到任何项目
+>  主要是觉得OpenSpec有些时候太硬了，不灵活且不适合自己，所以自己配了context engineering 规则，验证还不错，留做自用；
 >
-> **版本**: v1.0.0 | **最后更新**: 2026-01-03
+>  当然大家也可以根据需要配置自己的规则
 
-## 📦 项目简介
+### Pre:
+项目中已经安装了claude code
 
-SimpleSpec 是一个 Claude Code 配置文件自动化安装包，旨在简化 Claude Code 配置在不同项目间的部署和管理。通过单条命令即可在任何项目中安装标准化的 Claude Code 配置。
+### How to install
+```
+curl -fsSL https://raw.githubusercontent.com/canwhite/SimpleSpec/main/install.sh | bash
+```
 
-### 核心特性
+### How to use
 
-- 🚀 **一键安装**: 单条命令完成所有配置安装
-- 💾 **自动备份**: 安装前自动备份现有配置
-- 🔄 **版本管理**: 支持安装特定版本的配置
-- ↩️ **回滚机制**: 支持一键回滚到之前版本
-- 📊 **批量部署**: 支持在多个项目中批量安装
-- 🛡️ **安全可靠**: 失败自动回滚，内容验证
+1. 终端输入claude启用cc
+2. START:  输入任务prompt开始任务
+   - 此时如果没有全局production会自建，这是项目锚点；
+   - 然后task会建在项目schema/文件夹下，e.g. schema/task_apply_config_260103_210524.md，然后任务会自动执行
 
-## 📦 包含文件
+3. DONE: schema/task_apply_config_260103_210524.md
+   - 任务完成之后输入DONE: 任务名，任务就会存档到schema/archive
 
-| 文件 | 说明 |
-|------|------|
-| `.claudecode.json` | Claude Code 自定义指令配置 |
-| `CLAUDE.md` | 全感知任务管理模式协议文档（v2.0） |
-| `install.sh` | 自动化安装脚本 |
-| `production.md` | 项目全局状态文档 |
 
-## 🎯 快速开始
+### Context Engineering
 
-### 方式1: 远程一键安装（推荐）
+#### 理念说明
 
-在任何项目中执行：
+SimpleSpec 采用了一套基于**物理文件载体**的 AI 任务管理方法论，通过将 AI 的思考过程外化为可追溯的文档，解决了长上下文场景下的注意力衰减问题。这套方法受到了现代 AI 智能体工程（Agentic Engineering）理念的启发，但更注重实战可用性。
 
+#### 已实现的核心机制
+
+##### 1. Project Memory Index (production.md) - 长期记忆
+
+**作用**：作为项目的"常识库"和全局认知锚点。
+
+**在 SimpleSpec 中的实现**：
+- 项目初始化时自动创建或检查 `production.md`
+- 包含项目定位、核心架构、技术栈、目录结构等关键信息
+- 每次任务启动时首先读取，确保 AI 对项目有全局认知
+
+**示例**：
 ```bash
-# 使用 curl
-curl -fsSL https://raw.githubusercontent.com/yourusername/SimpleSpec/main/install.sh | bash
-
-# 使用 wget
-wget -qO- https://raw.githubusercontent.com/yourusername/SimpleSpec/main/install.sh | bash
+# AI 自动执行
+ls -R && cat production.md
 ```
 
-### 方式2: 本地安装
+##### 2. Dynamic Contextual Refreshing (末尾重述) - 瞬时注意力
 
+**作用**：对抗长上下文带来的注意力衰减，每次回复末尾强制刷新关键信息。
+
+**在 SimpleSpec 中的实现**：
+- 每次回复末尾必须包含任务快照：
+```text
+[项目全局状态]: 已同步至 production.md
+[当前任务文件]: <文件名>
+[当前目标]: <一句话目标>
+[已完成]: <最近一步>
+[下一步]: <下一步>
+```
+
+**效果**：确保 AI 始终知道"我是谁、我在哪、我要干什么"。
+
+##### 3. Recursive Task Decomposition (schema/task_*.md) - 递归任务分解
+
+**作用**：将大任务拆解为可管理的小任务，防止"逻辑偏移"。
+
+**在 SimpleSpec 中的实现**：
+- 收到 `START:` 指令时，创建 `schema/task_[简码]_[时间戳].md`
+- 在任务文档中列出：最终目标、拆解步骤、当前进度
+- 使用 TodoWrite 工具创建待办列表，一次只激活一个子任务
+
+**关键规则**：
+```
+一次只允许激活一个子任务
+只有当前子任务完成后，才允许更新状态并锁定下一个子任务
+```
+
+**示例**：
+```markdown
+## 拆解步骤
+1. 分析现有代码
+   - [ ] 1.1 读取主文件
+   - [ ] 1.2 识别关键函数
+2. 实现新功能
+   - [ ] 2.1 编写核心逻辑
+   - [ ] 2.2 添加错误处理
+```
+
+#### 可增强的机制
+
+以下机制可以根据实际需要选择性添加：
+
+##### 1. Environment Feedback Loop - 环境反馈循环
+
+**目的**：解决 AI"盲目自信"问题，确保任务真的完成。
+
+**实现建议**：
+在 CLAUDE.md 的协议中加入：
+```markdown
+## 验证机制
+- 禁止仅凭直觉更新 [已完成] 状态
+- 必须在更新前执行验证命令（如 ls, grep, npm test）
+- 必须在任务文档中附上验证结果
+```
+
+**示例**：
+```markdown
+## 当前进度
+### 正在进行
+正在实现用户认证功能
+
+### 验证结果
 ```bash
-# 克隆仓库
-git clone https://github.com/yourusername/SimpleSpec.git
-cd SimpleSpec
-
-# 执行安装
-bash install.sh install
+$ npm test
+✓ All tests passed
+```
 ```
 
-### 方式3: 手动安装
+##### 2. Error Propagation Constraint - 错误传播约束
 
-```bash
-# 下载配置文件
-curl -O https://raw.githubusercontent.com/yourusername/SimpleSpec/main/.claudecode.json
-curl -O https://raw.githubusercontent.com/yourusername/SimpleSpec/main/CLAUDE.md
+**目的**：解决"幻觉螺旋"，防止 AI 在错误路径上越走越远。
 
-# 创建schema目录
-mkdir -p schema/archive
+**实现建议**：
+在 CLAUDE.md 中加入"断路器"机制：
+```markdown
+## 断路器机制
+如果 [下一步] 连续 3 次未能改变 [已完成] 的状态：
+1. 立即停止当前操作
+2. 清空当前瞬时注意力
+3. 重新读取 production.md
+4. 从头反思任务路径是否正确
 ```
 
-## 🔧 脚本功能
+#### S.P.A.R 框架总结
 
-### 安装功能
-- ✅ 自动备份现有配置
-- ✅ 下载最新配置文件
-- ✅ 创建必要的目录结构
-- ✅ 失败自动回滚
+这套方法论可以归纳为 **S.P.A.R 框架**：
 
-### 管理功能
-```bash
-# 查看所有备份
-bash install.sh backups
+| 维度 | 英文 | 含义 | 在 SimpleSpec 中的体现 |
+|------|------|------|----------------------|
+| **S** | Stateful | 状态化 | `schema/task_*.md` 让 AI 变成有状态的实例 |
+| **P** | Persistent | 持久化 | `production.md` 确保全局认知不丢失 |
+| **A** | Anchored | 锚定化 | "末尾重述"将注意力锚定在最近的上下文 |
+| **R** | Reflective | 反思化 | 环境反馈循环和错误约束（可选增强） |
 
-# 回滚到最近的备份
-bash install.sh rollback
+**当前状态**：SimpleSpec 已实现 **S、P、A** 三个维度，足以应付 90% 的日常开发任务。
 
-# 清理30天前的旧备份
-bash install.sh clean
+#### 实践建议
 
-# 查看帮助
-bash install.sh help
-```
+1. **先使用，后优化**
+   - 用现有配置跑一周，观察实际效果
+   - 记录 AI 在哪些任务上容易出错
+   - 针对性添加增强机制
 
-## 📁 安装后的目录结构
+2. **不要过度工程化**
+   - 当前配置已经形成完整的闭环
+   - 除非遇到明确痛点，否则不需要添加更多约束
 
-```
-your-project/
-├── .claudecode.json          # Claude Code 配置
-├── CLAUDE.md                  # 任务管理协议
-├── schema/                    # 任务文档目录
-│   ├── archive/               # 已归档任务
-│   └── task_*.md             # 进行中的任务
-└── .claude-code-backup/      # 备份目录（自动创建）
-    ├── .claudecode.json.20260103_120000
-    ├── CLAUDE.md.20260103_120000
-    └── schema.20260103_120000
-```
+3. **保持简单**
+   - 物理文件载体是最简单可靠的方案
+   - 避免引入额外的复杂度（如数据库、外部依赖）
 
-## ⚙️ 配置说明
+4. **实战验证**
+   - 在真实项目中使用
+   - 根据实际反馈调整
+   - 保持文档和代码同步更新
 
-### .claudecode.json
+#### 参考资源
 
-定义 Claude Code 的行为模式：
-
-```json
-{
-  "version": "2.0",
-  "customInstructions": [
-    "遵循 'CLAUDE.md' 中的全感知任务管理模式 v2.0。",
-    "核心原则1：收到 'START:' 指令时，必须先检查production.md...",
-    "核心原则2：收到 'START:' 指令后，必须创建 schema/task_*.md..."
-  ],
-  "notAllowedPatterns": [
-    "在收到 'START:' 没有检查production.md就执行后续操作",
-    "在收到 'START:' 指令后未创建 'schema/task_*.md' 就开始执行代码"
-  ]
-}
-```
-
-### CLAUDE.md
-
-定义详细的任务管理协议，包括：
-- 全局认知初始化
-- 任务启动流程
-- 动态上下文刷新
-- 任务结项流程
-- 错误恢复机制
-
-## 🔄 备份和恢复
-
-### 自动备份
-
-每次安装前自动备份现有配置：
-```bash
-.claude-code-backup/
-├── .claudecode.json.20260103_120000
-├── CLAUDE.md.20260103_120000
-└── schema.20260103_120000
-```
-
-### 手动回滚
-
-```bash
-# 回滚到最近的备份
-bash install.sh rollback
-
-# 或手动恢复
-cp .claude-code-backup/.claudecode.json.20260103_120000 .claudecode.json
-cp .claude-code-backup/CLAUDE.md.20260103_120000 CLAUDE.md
-```
-
-## 🛠️ 自定义配置
-
-### 修改远程仓库URL
-
-编辑 `install.sh` 中的 `REPO_URL`：
-
-```bash
-REPO_URL="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main"
-```
-
-### 修改配置文件
-
-1. Fork 本仓库
-2. 修改 `.claudecode.json` 和 `CLAUDE.md`
-3. 更新 install.sh 中的 REPO_URL 指向你的仓库
-4. 使用你自己的安装命令
-
-## 📊 版本管理
-
-### 查看当前版本
-
-```bash
-grep "SCRIPT_VERSION" install.sh
-# 输出: SCRIPT_VERSION="1.0.0"
-```
-
-### 更新到最新版本
-
-```bash
-# 重新运行安装脚本
-curl -fsSL https://raw.githubusercontent.com/yourusername/claude-code-config/main/install.sh | bash
-```
-
-## 🌟 使用示例
-
-### 在新项目中使用
-
-```bash
-cd /path/to/your/project
-curl -fsSL https://raw.githubusercontent.com/yourusername/claude-code-config/main/install.sh | bash
-
-# 配置已安装，现在可以使用：
-# START: 分析代码架构
-```
-
-### 批量安装到多个项目
-
-```bash
-#!/bin/bash
-PROJECTS=("/path/to/project1" "/path/to/project2" "/path/to/project3")
-
-for project in "${PROJECTS[@]}"; do
-  echo "安装到 $project"
-  cd "$project"
-  curl -fsSL https://raw.githubusercontent.com/yourusername/claude-code-config/main/install.sh | bash
-done
-```
-
-### 集成到项目初始化脚本
-
-```bash
-#!/bin/bash
-# init-project.sh
-
-echo "初始化项目..."
-
-# 你的其他初始化步骤...
-
-# 安装 Claude Code 配置
-echo "安装 Claude Code 配置..."
-curl -fsSL https://raw.githubusercontent.com/yourusername/claude-code-config/main/install.sh | bash
-
-echo "项目初始化完成！"
-```
-
-## 🔍 故障排查
-
-### 问题1: 安装失败
-
-**症状**: 脚本执行出错
-
-**解决方案**:
-```bash
-# 检查网络连接
-ping raw.githubusercontent.com
-
-# 手动下载测试
-curl -I https://raw.githubusercontent.com/yourusername/claude-code-config/main/.claudecode.json
-
-# 查看详细日志
-bash -x install.sh install
-```
-
-### 问题2: 权限错误
-
-**症状**: Permission denied
-
-**解决方案**:
-```bash
-# 添加执行权限
-chmod +x install.sh
-
-# 或使用bash直接执行
-bash install.sh install
-```
-
-### 问题3: 配置文件已存在
-
-**症状**: 担心覆盖现有配置
-
-**解决方案**:
-```bash
-# 脚本会自动备份，无需担心
-# 安装前查看备份
-bash install.sh backups
-
-# 如需回滚
-bash install.sh rollback
-```
-
-## 📝 更新日志
-
-### v1.0.0 (2026-01-03)
-- ✨ 初始版本
-- ✅ 支持自动化安装
-- ✅ 支持备份和回滚
-- ✅ 支持远程安装
-- ✅ 支持本地安装
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 📄 许可证
-
-MIT License
-
-## 🔗 相关链接
-
-- [Claude Code 官方文档](https://docs.anthropic.com)
-- [项目仓库](https://github.com/yourusername/claude-code-config)
-
-## 💡 提示
-
-1. **首次使用**: 建议先在测试项目中试用
-2. **定期更新**: 定期运行安装脚本获取最新配置
-3. **自定义配置**: Fork 仓库并修改配置以适应你的需求
-4. **版本控制**: 将 `.claudecode.json` 和 `CLAUDE.md` 提交到项目仓库
-
----
-
-**作者**: Claude Code Assistant
-**版本**: 1.0.0
-**最后更新**: 2026-01-03
+- **本项目的协议文档**：`CLAUDE.md` - 详细的全感知任务管理模式 v2.0
+- **任务文档示例**：`schema/task_*.md` - 实际的任务执行记录
+- **项目全局状态**：`production.md` - 项目认知锚点
