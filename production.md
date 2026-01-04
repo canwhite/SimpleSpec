@@ -384,3 +384,6 @@ bash /path/to/install.sh backups
 - 2026-01-03: 修改 install.sh 的 REPO_URL 为 canwhite/SimpleSpec
 - 2026-01-03: 优化 README.md 的 Context Engineering 部分，增强结构和实用性
 - 2026-01-03: 归档已完成任务 task_apply_config 和 task_check_requirements
+- 2026-01-04: 创建 install.sh 实现机制详解文档 (schema/install_sh_implementation_guide.md)
+- 2026-01-04: 归档已完成任务 task_explain_install_260104_142217
+- 2026-01-04: 归档已完成任务 task_fix_context_eng_260103_213055

@@ -51,7 +51,7 @@ show_banner() {
 # 检查依赖
 check_dependencies() {
     log_info "检查依赖..."
-
+    # /dev/null 是黑洞，垃圾桶的意思
     if ! command -v curl &> /dev/null && ! command -v wget &> /dev/null; then
         log_error "需要 curl 或 wget 来下载文件"
         exit 1
@@ -99,6 +99,12 @@ download_file() {
             log_success "${description} 下载完成"
             return 0
         fi
+
+    # 2>/dev/null
+    # - 2 = 标准错误
+    # - > = 重定向到
+    # - /dev/null = 黑洞设备（丢弃所有写入的数据）
+    
     elif command -v wget &> /dev/null; then
         if wget -q "${url}" -O "${dest}"; then
             log_success "${description} 下载完成"
@@ -206,9 +212,11 @@ EOF
 main() {
     show_banner
 
-    # 解析命令行参数
+    # 解析命令行参数，主要是输入，如果输入的第一个位置有值就用它，如果没值就默认调用install
+    # 这种写法类似三目呀
     local command=${1:-install}
 
+    # switch 写法
     case "$command" in
         install)
             check_dependencies
@@ -237,4 +245,5 @@ main() {
 }
 
 # 执行主函数
+# $@ ,传递给脚本的命令行参数
 main "$@"
