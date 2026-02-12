@@ -152,7 +152,7 @@ curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/SimpleSpec/main/insta
 - 任务初始化命令
 
 **CLAUDE.md** 包含：
-- 全感知任务管理模式 v2.0
+- 全感知任务管理模式 v3.0
 - 任务启动流程
 - 动态上下文刷新
 - 错误恢复机制
@@ -259,9 +259,9 @@ curl -fsSL https://raw.githubusercontent.com/user/SimpleSpec/v1.0.0/install.sh |
 
 ```json
 {
-  "version": "2.0",
+  "version": "3.0",
   "customInstructions": [
-    "遵循 'CLAUDE.md' 中的全感知任务管理模式 v2.0。",
+    "遵循 'CLAUDE.md' 中的全感知任务管理模式 v3.0。",
     "核心原则：收到 START: 指令时，必须先检查是否有production.md..."
   ],
   "notAllowedPatterns": [
